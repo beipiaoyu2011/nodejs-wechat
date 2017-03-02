@@ -1,0 +1,9 @@
+{
+    "wechat":{
+        "appId": "wx3ae444786cf37295",
+        "appSecret":"fcfe020321b2a1e467849a83ed19c7b8",
+        "token": "beipiaoyu",
+        "prefix": "https://api.weixin.qq.com/cgi-bin/",
+        "mpPrefix": "https://mp.weixin.qq.com/cgi-bin/"
+    }
+}
