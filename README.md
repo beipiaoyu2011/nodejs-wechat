@@ -34,7 +34,7 @@
 	这是因为还需要在你搭建的服务器里面进行 token 验证：
 	你先把服务器代码库git clone 下来，然后新建一个index.php
 ![](http://i.imgur.com/q9qHh7T.png)
-	index.php代码如下
+[index.php](https://github.com/huainanhai/nodejs-wechat/blob/master/index.php)代码如下
 
 	<?php
 	define("TOKEN", "beipiaoyu"); // 定义自己的TOKEN值，并且与微信公众平台提供的值相同即可
