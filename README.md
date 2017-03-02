@@ -1,7 +1,7 @@
 
 #基于nodeJs 开发微信公众号
 
-1、利用express生成项目文件目录是很方便的，命令是：
+## 1、利用express生成项目文件目录是很方便的，命令是： ##
 
 	-  express nodejs-wechat	
 	-  cd nodejs-wechat & npm install 进入并安装node的包 
@@ -9,14 +9,12 @@
 	 
 	对于目前这个文件，你git clone +地址 复制下来就行了，不需要重新开始建立文件；
 
-2、 如何在本地进行微信公众号的开发和调试
+# 2、如何在本地进行微信公众号的开发和调试 #
 	
-    开发微信公众号，大家都知道需要一个外部ip，也就是我们需要有个自己的服务器，作为开发者。我们一般都没有自己的服务器。
+## 开发微信公众号，大家都知道需要一个外部ip，也就是我们需要有个自己的服务器，作为开发者。我们一般都没有自己的服务器。 ##
    ![](http://i.imgur.com/7s45j3A.png)
 
-  	可是我们怎么样找一个服务器呢？
-	
-   [新浪云sae](http://www.sinacloud.com/)是一个不错的选择。
+## 可是我们怎么样找一个服务器呢？ [新浪云sae](http://www.sinacloud.com/)是一个不错的选择。 ##
 ![](http://i.imgur.com/i3aebd5.png)
 ![](http://i.imgur.com/6WpyrAx.png)
 ![](http://i.imgur.com/zFQ6Mvk.png)
@@ -27,14 +25,13 @@
 	 token自定义一个名字即可
      EncodingAESKey 随机即可
  ![](http://i.imgur.com/7s45j3A.png)
-
-	  当你填写完你会发现提示“token验证失败”：
+## 当你填写完你会发现提示“token验证失败”： ##
 ![](https://gss0.baidu.com/-vo3dSag_xI4khGko9WTAnF6hhy/zhidao/pic/item/c83d70cf3bc79f3ddd7648aeb9a1cd11738b299c.jpg)
 	
 	这是因为还需要在你搭建的服务器里面进行 token 验证：
 	你先把服务器代码库git clone 下来，然后新建一个index.php
 ![](http://i.imgur.com/q9qHh7T.png)
-[index.php](https://github.com/huainanhai/nodejs-wechat/blob/master/index.php)代码如下
+## [index.php](https://github.com/huainanhai/nodejs-wechat/blob/master/index.php)代码如下： ##
 
 	<?php
 	define("TOKEN", "beipiaoyu"); // 定义自己的TOKEN值，并且与微信公众平台提供的值相同即可
@@ -139,9 +136,14 @@
 	4、PHP文件以utf-8格式保存，并打包.zip
 
 
+# 3、nodejs中微信公众号开发-接口配置和签名验证 #
 
-
-
-
-3、 nodejs中微信公众号开发-接口配置和签名验证
+## 使用的模块 ##
+	sha1 : 加密模块
+	安装 : npm install sha1 -save
+## 改造项目 ##
+	--创建config文件夹
+	项目根目录下创建config文件夹,
+	在config文件夹下添加config.json文件,主要是appID,token等
+	这些基本参数在微信号个人中心有,复制过来就是了.token必须和配置接口的token一致
 
