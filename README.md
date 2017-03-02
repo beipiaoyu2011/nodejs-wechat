@@ -19,9 +19,12 @@
    [新浪云sae](http://www.sinacloud.com/)是一个不错的选择。
 ![](http://i.imgur.com/i3aebd5.png)
 ![](http://i.imgur.com/6WpyrAx.png)
+![](http://i.imgur.com/zFQ6Mvk.png)
 
 	 可以选择php的标准环境，这个是不收费的。你可以写上你想要的二级域名，这样你就有了一个外部ip;
-	
+	 此时我们可以进入微信公众平台填写我们的服务器配置：
+	 url就是你刚获取到的域名
+ ![](http://i.imgur.com/7s45j3A.png)
 
 3、 nodejs中微信公众号开发-接口配置和签名验证
 
