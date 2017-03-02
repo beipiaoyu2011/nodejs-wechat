@@ -276,8 +276,26 @@
 	新打开一个doc窗口，用自带的客户端工具进行测试 命令【redis-cli.exe】,详细操作如下。。
 	事例展示了一个基本的读写操作，设置set key->age，value->21，get age 得到key的值。^_^
 
+![](http://i.imgur.com/Gsi5W44.png)
 
-
+	微信的access_token是从获取开始7200秒后失效,也就是2个小时,需要重新获取.
+	思路:
+	access_token必须能在路由中全局访问到,本系列博文在express框架中测试,
+	所以可以挂载到请求的对象(req)上;
+	获取一次可以使用2小时,2小时后需要重新获取,这里采用Redis数据库存储access_token,
+	为什么使用redis数据库呢疑问,因为redis数据库也带过期特性,感觉天生就和access_token
+	的过期匹配,结合起来使用非常方便.开始改造.
+	-- 需要的模块
+	request  -- 调用微信接口模块
+	redis -- redis数据库模块
+	xml2js -- xml转为js对象
+	安装 npm install request xml2js redis -save
+	-- 封装几个方法
+	1.Promise化request;
+	Promise已经是nodejs的内置对象了,可以直接使用,从这里能看出nodejs以后异步代码发展路线估计也是Promise了
+	2.redis添加数据
+	3.redis获取数据
+	common文件夹的utils.js文件代码:
 
 
 
