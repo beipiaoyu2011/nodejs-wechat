@@ -215,3 +215,10 @@
 
 	在app.js文件中引入utils.js和config.json,然后使用签名认证中间件
 
+![](http://i.imgur.com/cQR5Go3.png)
+
+这个过程就添加了2个文件,修改了app.js文件
+
+![](http://i.imgur.com/PFcyOGv.png)
+
+# 4、access_token获取与保存 #
