@@ -240,7 +240,16 @@
 
  	Redis是一个开源的使用ANSIC语言编写、支持网络、可基于内存亦可持久化的日志型、Key-Value数据库，并提供多种语言的API。
 
-	在D盘新建文件夹【redis】，右键解压Redis ZIP包，把所有文件解压到redis文件夹中。（其他盘符也可以滴^_^）
+**安装Redis**
+
+官方网站：[http://redis.io/](http://redis.io/)
+
+官方下载：[http://redis.io/download](http://redis.io/download) 可以根据需要下载不同版本
+
+windows版：[https://github.com/huainanhai/redis-windows](https://github.com/huainanhai/redis-windows)
+
+
+	在D盘新建文件夹【redis】，右键解压redis64-2.8.12.zip包，把所有文件解压到redis文件夹中。（其他盘符也可以滴^_^）
 	文件介绍：
 	redis-benchmark.exe         #基准测试
 	redis-check-aof.exe         # aof
