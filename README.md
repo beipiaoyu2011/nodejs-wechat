@@ -222,3 +222,62 @@
 ![](http://i.imgur.com/PFcyOGv.png)
 
 # 4、access_token获取与保存 #
+
+	微信的access_token是从获取开始7200秒后失效,也就是2个小时,需要重新获取.
+	思路:
+	access_token必须能在路由中全局访问到,本系列博文在express框架中测试,
+	所以可以挂载到请求的对象(req)上;
+	获取一次可以使用2小时,2小时后需要重新获取,这里采用Redis数据库存储access_token,
+	为什么使用redis数据库呢疑问,因为redis数据库也带过期特性,感觉天生就和access_token
+	的过期匹配,结合起来使用非常方便.开始改造.
+	-- 需要的模块
+	request  -- 调用微信接口模块
+	redis -- redis数据库模块
+	xml2js -- xml转为js对象
+	安装 npm install request xml2js redis -save
+
+**[redis数据库](https://redis.io/)：**
+
+ 	Redis是一个开源的使用ANSIC语言编写、支持网络、可基于内存亦可持久化的日志型、Key-Value数据库，并提供多种语言的API。
+
+	在D盘新建文件夹【redis】，右键解压Redis ZIP包，把所有文件解压到redis文件夹中。（其他盘符也可以滴^_^）
+	文件介绍：
+	redis-benchmark.exe         #基准测试
+	redis-check-aof.exe         # aof
+	redischeck-dump.exe        # dump
+	redis-cli.exe               # 客户端
+	redis-server.exe            # 服务器
+	redis.windows.conf          # 配置文件
+
+![](http://i.imgur.com/ikr5pVY.png)
+
+	windows 运行（快捷键：windows键+R键），输入【cmd】命令，进入DOC操作系统窗口。
+	使用命令【redis-server.exe  redis.windows.conf】，
+	启动redis 服务【如果您没出现如下的错误，直接跳过】。
+	如果您也像我一样出现如下的错误，不用急，总有解决办法滴！
+
+![](http://i.imgur.com/ul2G9FP.png)
+
+	解决办法：
+	根据提示，是 maxheap 标识有问题,打开配置文件 redis.windows.conf ,
+	搜索 maxheap , 然后直接指定好内容即可.
+	......
+	# 
+	# maxheap <bytes>
+	maxheap 1024000000
+	.......
+	然后再次启动,OK,成功.
+
+**服务启动成功状态**
+
+![](http://i.imgur.com/M54l9Ns.png)
+
+	启动redis服务的doc窗口，不用关闭，因为服务需要一直执行，关闭服务，直接关闭窗口就行。
+	新打开一个doc窗口，用自带的客户端工具进行测试 命令【redis-cli.exe】,详细操作如下。。
+	事例展示了一个基本的读写操作，设置set key->age，value->21，get age 得到key的值。^_^
+
+
+
+
+
+
