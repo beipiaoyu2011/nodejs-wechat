@@ -285,17 +285,235 @@
 	获取一次可以使用2小时,2小时后需要重新获取,这里采用Redis数据库存储access_token,
 	为什么使用redis数据库呢疑问,因为redis数据库也带过期特性,感觉天生就和access_token
 	的过期匹配,结合起来使用非常方便.开始改造.
-	-- 需要的模块
+
+**需要的模块**
+
 	request  -- 调用微信接口模块
 	redis -- redis数据库模块
 	xml2js -- xml转为js对象
 	安装 npm install request xml2js redis -save
-	-- 封装几个方法
+
+**封装几个方法**
+
 	1.Promise化request;
 	Promise已经是nodejs的内置对象了,可以直接使用,从这里能看出nodejs以后异步代码发展路线估计也是Promise了
 	2.redis添加数据
 	3.redis获取数据
-	common文件夹的utils.js文件代码:
 
+**common文件夹的utils.js文件代码:**
 
+	var utils = {};  
+	var sha1 = require('sha1');  
+	var request = require('request');  
+	var redis = require("redis");    
+	var client = redis.createClient();    
+	    
+	client.on("error", function (err) {    
+	  console.log("Error :" , err);    
+	});    
+	    
+	client.on('connect', function(){    
+	  console.log('Redis连接成功.');    
+	})   
+	  
+	//检查微信签名认证中间件  
+	utils.sign = function (config){  
+    return function(req, res, next){  
+        config = config || {};  
+        console.log(config);  
+        var q = req.query;  
+        console.log(q);  
+      var token = config.wechat.token;  
+      var signature = q.signature; //微信加密签名  
+        var nonce = q.nonce; //随机数  
+        var timestamp = q.timestamp; //时间戳  
+        var echostr = q.echostr; //随机字符串  
+        /* 
+            1）将token、timestamp、nonce三个参数进行字典序排序 
+            2）将三个参数字符串拼接成一个字符串进行sha1加密 
+            3）开发者获得加密后的字符串可与signature对比，标识该请求来源于微信 
+        */  
+        var str = [token, timestamp, nonce].sort().join('');  
+        var sha = sha1(str);  
+        if (req.method == 'GET') {  
+  
+            if (sha == signature) {  
+                res.send(echostr+'')  
+            }else{  
+                res.send('err');  
+            }  
+        }  
+        else if(req.method == 'POST'){  
+            if (sha != signature) {  
+                return;  
+            }  
+            next();  
+        }  
+    }  
+	};  
+  
+	/**  
+	 * 添加string类型的数据  
+	 * @param key 键  
+	 * @params value 值   
+	 * @params expire (过期时间,单位秒;可为空，为空表示不过期)  
+	 */    
+	utils.set = function(key, value, expire){    
+  
+    return new Promise(function(resolve, reject){  
+    
+    client.set(key, value, function(err, result){    
+    
+      if (err) {    
+        console.log(err);    
+        reject(err);  
+        return;    
+      }    
+  
+      if (!isNaN(expire) && expire > 0) {    
+        client.expire(key, parseInt(expire));    
+      }    
+  
+      resolve(result);   
+    })   
+	  })   
+	};    
+	    
+	/**  
+	 * 查询string类型的数据  
+	 * @param key 键  
+	 */    
+	utils.get = function(key){    
+  
+    return new Promise(function(resolve, reject){  
+    
+    client.get(key, function(err,result){    
+    
+      if (err) {    
+        console.log(err);    
+        reject(err);    
+        return;    
+      }    
+  
+      resolve(result);    
+    });   
+	  })   
+	};    
+	  
+	//Promise化request  
+	utils.request = function(opts){  
+    opts = opts || {};  
+    return new Promise(function(resolve, reject){  
+        request(opts,function(error, response, body){  
+  
+            if (error) {  
+                return reject(error);  
+            }  
+            resolve(body);  
+        })  
+          
+    })  
+  
+	};  
+	  
+	module.exports = utils;  
 
+**封装微信操作API**
+
+	在common文件夹下,添加wechatapi.js文件,目前只有获取access_token的方法
+
+**wechatapi.js文件：**
+
+	/* 
+	 *微信相关操作api 
+	 */  
+	var wechatApi = {};  
+	var config = require('../config/config');  
+	var appID = config.wechat.appID;  
+	var appSecret = config.wechat.appSecret;  
+	var utils = require('./utils');  
+	var api = {  
+	    accessToken : `${config.wechat.prefix}token?grant_type=client_credential`,  
+	    upload : `${config.wechat.prefix}media/upload?`  
+	}  
+	  
+	//获取access_token  
+	wechatApi.updateAccessToken = function(){  
+    var url = `${api.accessToken}&appid=${appID}&secret=${appSecret}`;  
+    //console.log(url);  
+    var option = {  
+        url : url,  
+        json : true  
+    };  
+    return utils.request(option).then(function(data){  
+  
+        return Promise.resolve(data);  
+    })  
+	}  
+	  
+	module.exports = wechatApi;
+
+**改造index路由**
+
+	在index.js路由文件中添加router.use方法,router.use方法意思就是这个路由中所有的
+	请求都必须先经过这个方法才能往下执行,
+	-- 首先是从redis中获取access_token,如果获取到了,传递下去,如果没获取到就从微信端获取,然后传递下去;
+	-- 在第二个then方法中判断这个data是redis中的还是微信端的.方法有多种,我这里是判断data.expires_in
+	是否存在,如果存在就是微信端的,如果不存在就是redis数据库获取的;
+	-- 如果是redis中的access_token,就把他挂载到req对象上,下面的方法就可以通过req.accessToken得到值,
+	如果是微信端获取的access_token,就需要先保存到redis数据库中,再挂载到req对象上.
+
+**代码如下:**
+
+	//获取,验证access_token,存入redis中  
+	router.use(function(req, res, next) {  
+  
+    //根据token从redis中获取access_token  
+    utils.get(config.wechat.token).then(function(data){  
+        //获取到值--往下传递  
+        if (data) {  
+            return Promise.resolve(data);  
+        }  
+        //没获取到值--从微信服务器端获取,并往下传递  
+        else{  
+            return wechatApi.updateAccessToken();  
+        }  
+    }).then(function(data){  
+        console.log(data);  
+        //没有expire_in值--此data是redis中获取到的  
+        if (!data.expires_in) {  
+            console.log('redis获取到值');  
+            req.accessToken = data;  
+            next();  
+        }  
+        //有expire_in值--此data是微信端获取到的  
+        else{  
+            console.log('redis中无值');  
+            /** 
+             * 保存到redis中,由于微信的access_token是7200秒过期, 
+             * 存到redis中的数据减少20秒,设置为7180秒过期 
+             */  
+            utils.set(config.wechat.token,`${data.access_token}`,7180).then(function(result){  
+                if (result == 'OK') {  
+                    req.accessToken = data.access_token;  
+                    next();  
+                }  
+            })  
+        }  
+  
+    })  
+	}) 
+
+![](http://i.imgur.com/Vstfp5N.png)
+
+**测试**
+
+	访问 : http://localhost/,会经过router.use方法.在'/'方法中页面打印(req.accessToken);
+
+![](http://i.imgur.com/a8ZnPl0.png)
+
+![](http://i.imgur.com/I73A1tQ.png)
+
+![](http://i.imgur.com/cJc47cB.png)
+
+	这就是access_token了
