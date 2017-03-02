@@ -286,6 +286,10 @@
 	为什么使用redis数据库呢疑问,因为redis数据库也带过期特性,感觉天生就和access_token
 	的过期匹配,结合起来使用非常方便.开始改造.
 
+**[redis数据库可视化工具 Redis Desktop Manager](https://redisdesktop.com/download)**
+
+![](http://i.imgur.com/2hl2xqb.png)
+
 **需要的模块**
 
 	request  -- 调用微信接口模块
